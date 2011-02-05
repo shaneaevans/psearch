@@ -1,0 +1,6 @@
+                        Welcome to psearch
+                        ==================
+
+psearch is a python library for prospective or persistent search. It finds matching queries to a given document. This is different to traditional, or retrospective search, which finds matching documents to a given query.
+
+Please see the module documentation for usage eamples.
