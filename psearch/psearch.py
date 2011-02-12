@@ -140,7 +140,7 @@ def _write_terms(prefix, termmap, term_array, storage):
 class _Buffer(object):
     """Buffers on disk array data"""
     def __init__(self, dtype):
-        self.datafile = tempfile.TemporaryFile(prefix='cqr', suffix='qdata')
+        self.datafile = tempfile.TemporaryFile(prefix='psearch', suffix='qdata')
         self.dtype = dtype
         self.wcount = 0
 

@@ -18,8 +18,6 @@ terms.
 >>> list(matcher.matches(doc))
 [0]
 
-The indexmatches and indexmatchesfile functions are provided to convert from
-the "matchspec" match definitions to the psearch representation.
 """
 from .pstorage import TCHStore, MemoryStore, GDBMStore
 from .psearch import QueryMatcher, index

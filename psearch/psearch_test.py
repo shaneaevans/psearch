@@ -1,5 +1,5 @@
 """
-Testing for progressive search
+Testing for psearch
 """
 import sys, time, os
 from itertools import chain, izip
