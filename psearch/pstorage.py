@@ -4,10 +4,11 @@ Storage
 Implementations of storage engines for prospective search
 """
 import gdbm, cPickle, sys
+from itertools import chain, izip
 import numpy as np
 
-# numeric python datatype for stored data
-_plist_dtype = [('qid', np.int32), ('mask', np.int32)]
+# numeric python datatype for stored query and mask
+_pdtype = np.int32
 
 class MemoryStore(object):
     """Memory storage
@@ -63,15 +64,17 @@ class TCHStore(object):
 
     def write_posts(self, prefix, term, values):
         termstr = "%s%s" % (prefix, term)
-        posting = np.fromiter(values, _plist_dtype).tostring()
+        posting = np.fromiter(chain(*values), np.int32).tostring()
         self.db.putasync(termstr, posting)
     
     def read_posts(self, prefix, term):
         try:
             data = self.db["%s%s" % (prefix, term)]
-            return np.fromstring(data, _plist_dtype)
         except KeyError:
             return ()
+        else:
+            abuf = np.frombuffer(data, _pdtype)
+            return izip(abuf[::2], abuf[1::2])
     
     def close(self):
         self.db.close()
@@ -104,15 +107,17 @@ class GDBMStore(object):
     
     def write_posts(self, prefix, term, values):
         termstr = "%s%s" % (prefix, term)
-        posting = np.fromiter(values, _plist_dtype).tostring()
+        posting = np.fromiter(chain(*values), _pdtype).tostring()
         self.idxdb[termstr] = posting
     
     def read_posts(self, prefix, term):
         try:
             data = self.idxdb["%s%s" % (prefix, term)]
-            return np.fromstring(data, _plist_dtype)
         except KeyError:
             return ()
+        else:
+            abuf = np.frombuffer(data, _pdtype)
+            return izip(abuf[::2], abuf[1::2])
 
     def close(self):
         self.idxdb.close()
