@@ -6,11 +6,11 @@ Prospective search
 >>> storage = MemoryStore()
 
 # Create a sequence of (query_id, query) to index:
->>> query1 = [('A1', 'A2'), ('B1', 'B2')]
->>> query2 = [('B2',), ('C1', 'C2')]
->>> query3 = [('B2',)]
->>> filter3 = [('F3', 10, 20)]
->>> queries = [(0, query1, {}), (1, query2, {}), (2, query3, {'filters': filter3})]
+>>> from pquery import Query
+>>> query1 = Query(0, [('A1', 'A2'), ('B1', 'B2')])
+>>> query2 = Query(1, [('B2',), ('C1', 'C2')])
+>>> query3 = Query(2, [('B2',)], filters=[('F3', 10, 20)])
+>>> queries = [query1, query2, query3]
 
 # call the index method to create the index
 >>> index(queries, storage)
@@ -88,14 +88,14 @@ def index(queries, storage):
 
     termdata = _Buffer([('qid', np.int32), ('tid', np.int32), ('pos', np.int32)])
     qcount = qloaded = 0
-    for query_id, termdnf, data in queries:
+    for query in queries:
         qcount += 1
         # generate QID, TID, POS and write to file
-        qtpgen = ((query_id, _tid(term), pos) 
-                for (pos, or_terms) in enumerate(termdnf)
+        qtpgen = ((query.query_id, _tid(term), pos) 
+                for (pos, or_terms) in enumerate(query.search_terms)
                 for term in or_terms)
         termdata.addseq(qtpgen)
-        storage.set_data(query_id, data)
+        storage.set_data(query.query_id, query.data_dict)
         qloaded += 1
     saveddata = termdata.asarray()
     

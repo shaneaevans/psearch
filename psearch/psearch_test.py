@@ -10,6 +10,7 @@ from .pdump import recreate_queries
 from .pstorage import (GDBMStore, MemoryStore,
     TCHStore)
 from .pdoc import Document
+from .pquery import Query
 
 # storage classes to test
 def get_storage_classes():
@@ -28,9 +29,10 @@ class ReferenceSearch(object):
 
     def matches(self, document):
         ts = set(document.iterprefixedterms())
-        for qid, query, data in self.queries:
-            if all(any(t in ts for t in or_terms) for or_terms in query):
-                yield qid
+        for query in self.queries:
+            if all(any(t in ts for t in or_terms) 
+                    for or_terms in query.search_terms):
+                yield query.query_id
 
 def genterms(count, nterms):
     """Generate count random term from a vocabulary of size nterms using 
@@ -57,7 +59,7 @@ def gen_doc(nterms):
 def comparative_test(ndocs=100, nqueries=100, nterms=500):
     def ma(seq, key=None):
         return list(sorted(seq, key=key))
-    queries = [(i, gen_query(nterms), {}) for i in xrange(nqueries)]
+    queries = [Query(i, gen_query(nterms)) for i in xrange(nqueries)]
     reference = ReferenceSearch(queries)
     storage = MemoryStore()
     index(queries, storage)
@@ -90,7 +92,7 @@ def test_indexstructure(nqueries=100, nterms=500):
     for storage_class in get_storage_classes():
         storage = storage_class('ptest.db')
         queries = [(i, gen_query(nterms)) for i in xrange(nqueries)]
-        qdata = ((i, q, {'query': q}) for (i, q) in queries)
+        qdata = (Query(i, q, query=q) for (i, q) in queries)
         index(qdata, storage)
         # close and re-open in read mode to test the backing storage
         storage.close()
@@ -119,9 +121,9 @@ def runperf(ndocs=100000, nqueries=10000, nterms=50000):
     """Timed performance test"""
     istart = time.time()
     #storage = GDBMStore('ptest.db')
-    #storage = MemoryStore('ptest.db')
-    storage = TCHStore('ptest.db')
-    queries = [(i, gen_query(nterms), {}) for i in xrange(nqueries)]
+    storage = MemoryStore('ptest.db')
+    #storage = TCHStore('ptest.db')
+    queries = [Query(i, gen_query(nterms)) for i in xrange(nqueries)]
     index(queries, storage)
     print "indexed %d queries in %f seconds" % (nqueries, time.time() - istart)
     pmatcher = QueryMatcher(storage)

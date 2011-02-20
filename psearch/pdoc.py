@@ -14,17 +14,14 @@ class Document(object):
             terms. This contains sequences of terms, the terms in each 
             sequence are in the same order as the input document. For example:
             {'a field': [['first', 'values'], ['second values']]}
-        termfilters: all fields that may be used as filters and their terms
-            {'material': ['leather', 'faux leather']}
         rangefilters: a dict of fields and values that may be used as range filters.
             {'price', [100.0, 200.0]}
     each is a dictionary mapping from field name to a list of values.
 
     """
 
-    def __init__(self, textsearchterms, termfilters=None, rangefilters=None):
+    def __init__(self, textsearchterms, rangefilters=None):
         self.textsearchterms = textsearchterms
-        self.termfilters = termfilters or {}
         self.rangefilters = rangefilters or {}
         self._statscache = {}
     
@@ -53,9 +50,7 @@ class Document(object):
         ['first', 'value', 'category:chairs']
 
         """
-        pterms = ["%s:%s" % (field, term) for (field, terms) \
-                in self.termfilters.iteritems() for term in terms]
-        return chain(self.itertextterms(), pterms)
+        return self.itertextterms()
     
     def _stats(self, field):
         stats = self._statscache.get(field)
@@ -86,7 +81,7 @@ class Document(object):
         return tfs, doclen       
 
     def totuple(self):
-        return (self.textsearchterms, self.termfilters, self.rangefilters)
+        return (self.textsearchterms, self.rangefilters)
     
     @classmethod
     def fromtuple(cls, data):
@@ -94,8 +89,6 @@ class Document(object):
     
     def __str__(self):
         args = ["textsearchterms=%r" % self.textsearchterms]
-        if self.termfilters:
-            args.append("termfilters=%r" % self.termfilters)
         if self.rangefilters:
             args.append("rangefilters=%r" % self.rangefilters)
         return "Document(%s)" % ','.join(args)
