@@ -44,7 +44,7 @@ class QueryMatcher(object):
     def matches(self, document):
         """Return a sequence of queries that match the given list of tokens
         """
-        terms = set(document.iterprefixedterms())
+        terms = set(document.iterterms())
         candidates = dict(chain(*(self.storage.read_posts('R', t) for t in terms)))
         for term in terms:
             to_merge = [x for x in self.storage.read_posts('T', term) if x[0] in candidates]

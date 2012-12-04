@@ -25,33 +25,16 @@ class Document(object):
         self.rangefilters = rangefilters or {}
         self._statscache = {}
     
-    def itertextterms(self):
+    def iterterms(self):
         """iterate through all text terms
-
-        This ignores terms that participate in field queries
+        
+        >>> textterms = {'f': [['first'], ['second']], 'o': [['third']]}
+        >>> doc = Document(textterms)
+        >>> sorted(list(doc.iterterms()))
+        ['first', 'second', 'third']
         """
         return chain(*chain(*self.textsearchterms.itervalues()))
 
-    def iterprefixedterms(self):
-        """iterate through all terms
-
-        >>> textterms = {'f': [['first'], ['second']], 'o': [['third']]}
-        >>> doc = Document(textterms)
-        >>> sorted(list(doc.iterprefixedterms()))
-        ['first', 'second', 'third']
-
-        Terms that are filters are prefixed with the field they are 
-        filtering, for example "category:chairs". Terms that are 
-        not prefixed are included unmodified.
-        >>> textterms = {'field': [['first', 'value']]}
-        >>> filterterms = {'category': ['chairs']}
-        >>> doc = Document(textterms, filterterms)
-        >>> list(doc.iterprefixedterms())
-        ['first', 'value', 'category:chairs']
-
-        """
-        return self.itertextterms()
-    
     def _stats(self, field):
         stats = self._statscache.get(field)
         if stats is not None: return stats

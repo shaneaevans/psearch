@@ -28,7 +28,7 @@ class ReferenceSearch(object):
         self.queries = queries
 
     def matches(self, document):
-        ts = set(document.iterprefixedterms())
+        ts = set(document.iterterms())
         for query in self.queries:
             if all(any(t in ts for t in or_terms) 
                     for or_terms in query.search_terms):
