@@ -68,9 +68,7 @@ def index(queries, storage):
     documents to queries
     
     Parameters:
-        `queries`: a sequence of (query_id, term_dnf) to be indexed. Term DNF
-            is a disjunctive normal form of the query terms. For example
-            [[A, B], [C, D]] is (A or B) and (C or D)
+        `queries`: a sequence of pquery.Query objects
         `storage`: storage back end (see pstorage module)
     """
     # term id allocation. For really large data we could move to disk
